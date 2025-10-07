@@ -35,7 +35,7 @@ int main()
   return 0;
 }
 
-void imprimeVetor(int vetor[TAM], int tamFila)
+void imprimeVetor(int vetor[TAM])
 {
   int i;
 
