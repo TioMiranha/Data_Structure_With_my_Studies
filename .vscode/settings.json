@@ -46,7 +46,8 @@
   "files.associations": {
     "server.h": "c",
     "ledconfig.h": "c",
-    "mylib.h": "c"
+    "mylib.h": "c",
+    "stdlib.h": "c"
   },
   "idf.pythonInstallPath": "/usr/bin/python3",
   "[c]": {
