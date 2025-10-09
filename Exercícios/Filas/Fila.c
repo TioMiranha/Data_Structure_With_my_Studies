@@ -10,50 +10,14 @@ Todas as remoções serão feitas primeiro na fila de prioridade.
 Quando a fila de prioridade estiver vazia, remover da fila normal.
 Ao remover informar os dados da pessoa que será atendida.
 */
-#include <stdio.h>
-#include <stdlib.h>
-
-#define TAM 2
-
-typedef struct
-{
-  char nome[40];
-  int idade;
-} Pessoa;
-
-typedef struct
-{
-  Pessoa dados[TAM];
-  int inicio;
-  int tam;
-} Fila;
-
-typedef struct
-{
-  Pessoa dados[TAM];
-  int inicio;
-  int tam;
-} FilaPreferencial;
-
-void menu();
-void imprimeDados(Pessoa p);
-void listarFila(Fila *f);
-void inicializarConstrutorDaFila(Fila *fila);
-void inserirDados(Fila *f, Pessoa d);
-void inserirDadosPreferencial(FilaPreferencial *f, Pessoa d);
-void remove(Fila *f, FilaPreferencial *fPreferencial);
-void removerDadosNormal(Fila *f);
-void removerDadosPreferencial(FilaPreferencial *fPreferencial);
-Pessoa entrarNaFila();
-int filaIsFull(Fila *f);
-int filaIsEmpty(Fila *f);
+#include "Fila.h"
 
 int main()
 {
-  int i, op;
+  int op;
   Fila fila;
   FilaPreferencial fPreferencial;
-  inicializarConstrutorDaFila(&fila);
+  inicializarConstrutorDaFila(&fila, &fPreferencial);
 
   do
   {
@@ -61,21 +25,11 @@ int main()
     scanf("%d", &op);
 
     if (op == 1)
-    {
-      if (!filaIsFull(&fila))
-        entrarNaFila(&fila);
-      else
-        printf("Fila cheia");
-    }
+      entrarNaFila(&fila, &fPreferencial);
     if (op == 2)
-    {
-      if (!filaIsEmpty(&fila))
-        removerDados(&fila, &fPreferencial);
-      else
-        printf("A fila ja esta vazia");
-    }
+      remover(&fila, &fPreferencial);
     if (op == 8)
-      listarFila(&fila);
+      listarFilas(&fila, &fPreferencial);
 
   } while (op != 9);
 }
@@ -89,46 +43,67 @@ void menu()
   printf("Sair: 9 \n");
 }
 
-void inicializarConstrutorDaFila(Fila *fila)
+void inicializarConstrutorDaFila(Fila *fila, FilaPreferencial *filaPreferencial)
 {
   fila->tam = 0;
   fila->inicio = 0;
+
+  filaPreferencial->tam = 0;
+  filaPreferencial->inicio = 0;
 }
 
 void inserirDados(Fila *f, Pessoa d)
 {
-  f->dados[(f->tam + f->inicio) % TAM] = d;
+  f->dados[(f->tam + f->inicio) % TAM1] = d;
   f->tam++;
 }
 
 void inserirDadosPreferencial(FilaPreferencial *f, Pessoa d)
 {
-  f->dados[(f->tam + f->inicio) % TAM] = d;
+  f->dados[(f->tam + f->inicio) % TAM2] = d;
   f->tam++;
 }
 
-void remove(Fila *f, FilaPreferencial *fPreferencial)
+void remover(Fila *f, FilaPreferencial *fPreferencial)
 {
 
   if (fPreferencial->tam == 0)
-    removerDadosNormal(&f);
+  {
+    if (!filaNormalIsEmpty(f))
+    {
+      removerDadosNormal(f);
+    }
+    else
+    {
+      printf("A fila normal ja esta vazia \n");
+    }
+  }
   else
-    removerDadosPreferencial(&fPreferencial);
+  {
+    if (!filaPreferencialIsEmpty(fPreferencial))
+    {
+      removerDadosPreferencial(fPreferencial);
+    }
+    else
+    {
+      printf("A fila preferêncial ja esta vazia \n");
+    }
+  }
 }
 
 void removerDadosNormal(Fila *f)
 {
   f->tam--;
-  f->inicio = (f->inicio + 1) % TAM;
+  f->inicio = (f->inicio + 1) % TAM1;
 }
 
 void removerDadosPreferencial(FilaPreferencial *fPreferencial)
 {
   fPreferencial->tam--;
-  fPreferencial->inicio = (fPreferencial->inicio + 1) % TAM;
+  fPreferencial->inicio = (fPreferencial->inicio + 1) % TAM2;
 }
 
-Pessoa entrarNaFila(Fila *f)
+Pessoa entrarNaFila(Fila *f, FilaPreferencial *fPreferencial)
 {
   Pessoa p;
   getchar();
@@ -140,24 +115,66 @@ Pessoa entrarNaFila(Fila *f)
   scanf("%d", &p.idade);
 
   if (p.idade >= 60)
-    inserirDadosPreferencial(&f, p);
+  {
+    if (!filaPreferencialIsFull(fPreferencial))
+    {
+      inserirDadosPreferencial(fPreferencial, p);
+    }
+    else
+    {
+      printf("Fila preferêncial cheia, inserindo dados na fila normal... \n");
+      if (!filaNormalIsFull(f))
+      {
+        inserirDados(f, p);
+      }
+      else
+      {
+        printf("Fila normal cheia");
+      }
+    }
+  }
   else
-    inserirDados(&f, p);
+  {
+    if (!filaNormalIsFull(f))
+    {
+      inserirDados(f, p);
+    }
+    else
+    {
+      printf("Fila normal cheia");
+    }
+  }
 
   return p;
 }
 
-int filaIsFull(Fila *f)
+int filaNormalIsFull(Fila *f)
 {
-  if (f->tam == TAM)
+  if (f->tam == TAM1)
     return 1;
   else
     return 0;
 }
 
-int filaIsEmpty(Fila *f)
+int filaPreferencialIsFull(FilaPreferencial *fPreferencial)
+{
+  if (fPreferencial->tam == TAM2)
+    return 1;
+  else
+    return 0;
+}
+
+int filaNormalIsEmpty(Fila *f)
 {
   if (f->tam == 0)
+    return 1;
+  else
+    return 0;
+}
+
+int filaPreferencialIsEmpty(FilaPreferencial *fPreferencial)
+{
+  if (fPreferencial->tam == 0)
     return 1;
   else
     return 0;
@@ -169,11 +186,24 @@ void imprimeDados(Pessoa p)
   printf("Idade da pessoa: %d \n", p.idade);
 }
 
-void listarFila(Fila *f)
+void imprimeDadosPreferencial(Pessoa pPreferencial)
 {
-  int i, j;
-  for (i = 0, j = f->inicio; i < f->tam; i++, j = (j++ % TAM))
+  printf("Nome da pessoa: %s \n", pPreferencial.nome);
+  printf("Idade da pessoa: %d \n", pPreferencial.idade);
+}
+
+void listarFilas(Fila *f, FilaPreferencial *fPreferencial)
+{
+  int i, j, k, l;
+  for (i = 0, j = f->inicio; i < f->tam; i++, j = (j++ % TAM1))
   {
+    printf("Dados da fila normal: \n");
     imprimeDados(f->dados[j]);
+  }
+
+  for (k = 0, l = fPreferencial->inicio; k < fPreferencial->tam; k++, l = (l++ % TAM2))
+  {
+    printf("Dados da fila preferêncial: \n");
+    imprimeDadosPreferencial(fPreferencial->dados[l]);
   }
 }
