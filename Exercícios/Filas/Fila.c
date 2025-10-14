@@ -66,28 +66,23 @@ void inserirDadosPreferencial(FilaPreferencial *f, Pessoa d)
 
 void remover(Fila *f, FilaPreferencial *fPreferencial)
 {
+  Pessoa atendido;
 
-  if (fPreferencial->tam == 0)
+  if (!filaPreferencialIsEmpty(fPreferencial))
   {
-    if (!filaNormalIsEmpty(f))
-    {
-      removerDadosNormal(f);
-    }
-    else
-    {
-      printf("A fila normal ja esta vazia \n");
-    }
+    atendido = fPreferencial->dados[fPreferencial->inicio];
+    imprimeDadosPreferencial(atendido);
+    removerDadosPreferencial(fPreferencial);
+  }
+  else if (!filaNormalIsEmpty(f))
+  {
+    atendido = f->dados[f->inicio];
+    imprimeDados(atendido);
+    removerDadosNormal(f);
   }
   else
   {
-    if (!filaPreferencialIsEmpty(fPreferencial))
-    {
-      removerDadosPreferencial(fPreferencial);
-    }
-    else
-    {
-      printf("A fila preferêncial ja esta vazia \n");
-    }
+    printf("Nenhuma pessoa na fila.\n");
   }
 }
 
@@ -195,13 +190,13 @@ void imprimeDadosPreferencial(Pessoa pPreferencial)
 void listarFilas(Fila *f, FilaPreferencial *fPreferencial)
 {
   int i, j, k, l;
-  for (i = 0, j = f->inicio; i < f->tam; i++, j = (j++ % TAM1))
+  for (i = 0, j = f->inicio; i < f->tam; i++, j = (j + 1) % TAM1)
   {
     printf("Dados da fila normal: \n");
     imprimeDados(f->dados[j]);
   }
 
-  for (k = 0, l = fPreferencial->inicio; k < fPreferencial->tam; k++, l = (l++ % TAM2))
+  for (k = 0, l = fPreferencial->inicio; k < fPreferencial->tam; k++, l = (l + 1) % TAM2)
   {
     printf("Dados da fila preferêncial: \n");
     imprimeDadosPreferencial(fPreferencial->dados[l]);
